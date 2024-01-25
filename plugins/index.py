@@ -112,14 +112,16 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot, skip):
                 if not media:
                     unsupported += 1
                     continue
-                media.file_type = message.media.value
+                elif not (str(media.file_name).lower()).endswith(tuple(INDEX_EXTENSIONS)):
+                    unsupported += 1
+                    continue
                 media.caption = message.caption
-                aynav, vnay = await save_file(media)
-                if aynav:
+                sts = await save_file(media)
+                if sts == 'suc':
                     total_files += 1
-                elif vnay == 0:
+                elif sts == 'dup':
                     duplicate += 1
-                elif vnay == 2:
+                elif sts == 'err':
                     errors += 1
         except Exception as e:
             await msg.reply(f'Index canceled due to Error - {e}')
